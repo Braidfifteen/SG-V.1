@@ -36,16 +36,12 @@ class Teleporter(pygame.sprite.Sprite):
         random_num = 1
         if random_num == 1:
             return True
-        
 
-        
 class Room():
     def __init__(self):
         self.enemy_list = pygame.sprite.Group()
         self.wall_list = pygame.sprite.Group()
         self.teleporter_list = pygame.sprite.Group()
-        
-       
         
     def room_borders(self):
         
@@ -64,17 +60,13 @@ class Room():
                      ]
         return border_list
         
-        
-        
-
 class Room_0(Room):
     def __init__(self):
         super().__init__()
         self.teleporter = Teleporter(WHITE)
         if self.teleporter.teleporter_random_chance():
             self.teleporter_list.add(self.teleporter)
-       
-            
+         
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
                  [650, 350, 50, 350, RED],
@@ -99,7 +91,6 @@ class Room_1(Room):
         if self.teleporter.teleporter_random_chance():
             self.teleporter_list.add(self.teleporter)
   
-        
         walls = [[400, 300, 50, 200, PURPLE],
                  [350, 500, 50, 250, PURPLE],
                  [400, 750, 50, 200, PURPLE],
@@ -134,18 +125,6 @@ class Room_1(Room):
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(wall)
                  
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                  
-                 
-                 
-      
-
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -230,8 +209,7 @@ class Bullet(pygame.sprite.Sprite):
         bullet_wall_collision = pygame.sprite.spritecollide(self, self.room.wall_list, False)
         for bullet in bullet_wall_collision:
             self.kill()
-        
-       
+   
 def main():
     pygame.init()
     gameDisplay = pygame.display.set_mode((dX, dY))
@@ -251,7 +229,6 @@ def main():
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
-    #all_sprite_list.add(player.room.teleporter_list)
     
     is_shooting = False
     shot_timer = 0
@@ -286,9 +263,7 @@ def main():
                 is_shooting = True
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 is_shooting = False
-                
-                
-              
+    
         if is_shooting and shot_timer >= cooldown:
             pos = pygame.mouse.get_pos()
             mouse_x = pos[0]
@@ -305,20 +280,14 @@ def main():
                 current_room = room_list[current_room_no]
                 player.rect.x = 0
                 player.room = current_room
-                #all_sprite_list.add(player.room.teleporter_list)
+                
         if player.rect.x <= -15:
             if current_room_no == 1:
                 current_room_no = 0
                 current_room = room_list[current_room_no]
                 player.rect.x = dX
                 player.room = current_room
-                #all_sprite_list.add(player.room.teleporter_list)
                 
-                
-                
-                
-         
-         
         all_sprite_list.update()  
 
         gameDisplay.fill(BLACK)
@@ -327,10 +296,6 @@ def main():
         all_sprite_list.draw(gameDisplay)
         pygame.display.flip()
         
-        
- 
- 
- 
     pygame.quit()
     sys.exit
  
