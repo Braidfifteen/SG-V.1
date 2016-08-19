@@ -36,13 +36,24 @@ class Teleporter(pygame.sprite.Sprite):
         random_num = 1
         if random_num == 1:
             return True
+            
+class Enemies(pygame.sprite.Sprite):
+    def __init__(self, x, y, color):
+        super().__init__()
+        self.image = pygame.Surface([20, 20])
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 class Room():
     def __init__(self):
         self.enemy_list = pygame.sprite.Group()
         self.wall_list = pygame.sprite.Group()
         self.teleporter_list = pygame.sprite.Group()
-        
+        self.teleporter = Teleporter(WHITE)
+        if self.teleporter.teleporter_random_chance():
+            self.teleporter_list.add(self.teleporter)
     def room_borders(self):
         
                        # Left-top
@@ -63,10 +74,7 @@ class Room():
 class Room_0(Room):
     def __init__(self):
         super().__init__()
-        self.teleporter = Teleporter(WHITE)
-        if self.teleporter.teleporter_random_chance():
-            self.teleporter_list.add(self.teleporter)
-         
+        
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
                  [650, 350, 50, 350, RED],
@@ -87,10 +95,7 @@ class Room_1(Room):
     def __init__(self):
         
         super().__init__()
-        self.teleporter = Teleporter(RED)
-        if self.teleporter.teleporter_random_chance():
-            self.teleporter_list.add(self.teleporter)
-  
+
         walls = [[400, 300, 50, 200, PURPLE],
                  [350, 500, 50, 250, PURPLE],
                  [400, 750, 50, 200, PURPLE],
