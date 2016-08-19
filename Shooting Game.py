@@ -36,6 +36,15 @@ class Teleporter(pygame.sprite.Sprite):
         random_num = 1
         if random_num == 1:
             return True
+            
+class Enemies(pygame.sprite.Sprite):
+    def __init__(self,x, y, color):
+        super().__init__()
+        self.image = pygame.Surface([20, 20])
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 class Room():
     def __init__(self):
