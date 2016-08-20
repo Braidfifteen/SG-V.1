@@ -155,7 +155,9 @@ class Teleporter(pygame.sprite.Sprite):
         return grid
           
 class Enemies(pygame.sprite.Sprite):
+    
     def __init__(self, x, y, color):
+
         super().__init__()
         self.image = pygame.Surface([20, 20])
         self.image.fill(BLUE)
