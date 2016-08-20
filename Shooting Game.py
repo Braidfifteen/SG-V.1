@@ -23,6 +23,30 @@ class Wall(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         
+class RoomBorders():
+    def __init__(self):
+        pass
+        
+            
+    def left_right_door(self, color):
+         
+                       # Left-top
+        border_list = [[0, 0, 30, 450, color],
+                       # Left-bottom
+                       [0, 550, 30, dY, color],
+                       # Bottom
+                       [0, 1050, dX, 30, color],
+                       # Right-top
+                       [1890, 0, 30, 450, color],
+                       # Right-bottom
+                       [1890, 550, 30, dY, color],
+                       # Top
+                       [0, 0, dX, 30, color],
+                      ]
+        return border_list
+        
+        
+        
 class Teleporter(pygame.sprite.Sprite):
     def __init__(self, color):
         super().__init__()
@@ -47,9 +71,7 @@ class Teleporter(pygame.sprite.Sprite):
             for x in range(200):
                 grid.append([dx+x, dy+y])
         return grid
-        
-                
-            
+          
 class Enemies(pygame.sprite.Sprite):
     def __init__(self, x, y, color):
         super().__init__()
@@ -65,6 +87,7 @@ class Room():
         self.wall_list = pygame.sprite.Group()
         self.teleporter_list = pygame.sprite.Group()
         self.teleporter = Teleporter(WHITE)
+        self.borders = RoomBorders()
         if self.teleporter.teleporter_random_chance():
             self.teleporter_list.add(self.teleporter)
         
@@ -89,6 +112,7 @@ class Room_0(Room):
     def __init__(self):
         super().__init__()
         
+        
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
                  [650, 350, 50, 350, RED],
@@ -97,10 +121,12 @@ class Room_0(Room):
                  [1500, 150, 50, 250, RED],
                  [1200, 800, 500, 50, RED]
                 ]
-
-        for item in self.room_borders():
+        
+        for item in self.borders.left_right_door(WHITE):
             border = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(border)
+         
+            
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(wall)
@@ -223,7 +249,7 @@ class Bullet(pygame.sprite.Sprite):
         x_diff = dest_x - start_x
         y_diff = dest_y - start_y
         angle = math.atan2(y_diff, x_diff);
-        velocity = 30
+        velocity = 10
         self.moveX = math.cos(angle) * velocity
         self.moveY = math.sin(angle) * velocity
         self.room = None
@@ -244,8 +270,7 @@ def main():
     pygame.init()
     gameDisplay = pygame.display.set_mode((dX, dY))
     clock = pygame.time.Clock()
-    
-    
+     
     room_list = []
     room = Room_0()
     room_list.append(room)
@@ -262,7 +287,7 @@ def main():
     
     is_shooting = False
     shot_timer = 0
-    cooldown = 200
+    cooldown = 600
     while True:
         clock.tick(FPS)
         shot_timer += clock.get_time()
