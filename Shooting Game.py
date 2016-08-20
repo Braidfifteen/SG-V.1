@@ -33,7 +33,7 @@ class Teleporter(pygame.sprite.Sprite):
         self.rect.y = random.randrange(50, 1000)
 
     def teleporter_random_chance(self):
-        random_num = 1
+        random_num = random.randrange(20)
         if random_num == 1:
             return True
             
