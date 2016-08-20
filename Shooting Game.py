@@ -40,11 +40,94 @@ class RoomBorders():
                        # Right-bottom
                        [1890, 550, 30, dY, color],
                        # Top
-                       [0, 0, dX, 30, color],
+                       [0, 0, dX, 30, color]
                       ]
         return border_list
         
+    def up_down_door(self, color):
         
+                        # Top-left
+        border_list = [[0, 0, 900, 30, color],
+                        # Top-right
+                       [1000, 0, 920, 30, color],
+                        # Bottom-left
+                       [0, 1050, 900, 30, color],
+                        # Bottom-right
+                       [1000, 1050, 920, 30, color],
+                        # Left
+                       [0, 0, 30, dY, color],
+                        # Right
+                       [1890, 0, 30, dY, color]
+                      ]
+        return border_list
+        
+    def left_up_door(self, color):
+        
+                        # Top-left
+        border_list = [[0, 0, 900, 30, color],
+                        # Top-right
+                       [1000, 0, 920, 30, color],
+                        # Bottom
+                       [0, 1050, dX, 30, color],
+                        # Right
+                       [1890, 0, 30, dY, color],
+                        # Left-top
+                       [0, 0, 30, 450, color],
+                        # Left-bottom
+                       [0, 550, 30, dY, color]
+                      ]
+        return border_list
+        
+    def left_down_door(self, color):
+        
+                        # Top
+        border_list = [[0, 0, dX, 30, color],
+                        # Right
+                       [1890, 0, 30, dY, color],
+                        # Bottom-right
+                       [1000, 1050, 920, 30, color],
+                        # Bottom-left
+                       [0, 1050, 900, 30, color],
+                        # Left-bottom
+                       [0, 550, 30, dY, color],
+                        # Left-top
+                       [0, 0, 30, 450, color]
+                      ]
+        return border_list       
+
+    def right_down_door(self, color):
+        
+                        # Top        
+        border_list = [[0, 0, dX, 30, color],
+                        # Right-top
+                       [1890, 0, 30, 450, color],
+                        # Right-bottom
+                       [1890, 550, 30, dY, color],
+                        # Bottom-right
+                       [1000, 1050, 920, 30, color],
+                        # Bottom-left
+                       [0, 1050, 900, 30, color],
+                        # Left
+                       [0, 0, 30, dY, color]
+                      ]
+        return border_list
+        
+    def right_up_door(self, color):
+        
+                        # Top-left       
+        border_list = [[0, 0, 900, 30, color],
+                        # Top-right
+                       [1000, 0, 920, 30, color],
+                        # Right-top
+                       [1890, 0, 30, 450, color],
+                        # Right-bottom
+                       [1890, 550, 30, dY, color],
+                        # Bottom
+                       [0, 1050, dX, 30, color],
+                        # Left
+                       [0, 0, 30, dY, color]
+                      ]
+        return border_list
         
 class Teleporter(pygame.sprite.Sprite):
     def __init__(self, color):
@@ -97,8 +180,7 @@ class Room():
 class Room_0(Room):
     def __init__(self):
         super().__init__()
-        
-        
+                
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
                  [650, 350, 50, 350, RED],
@@ -112,7 +194,6 @@ class Room_0(Room):
             border = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(border)
          
-            
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(wall)
