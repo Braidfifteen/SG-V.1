@@ -33,9 +33,22 @@ class Teleporter(pygame.sprite.Sprite):
         self.rect.y = random.randrange(50, 1000)
 
     def teleporter_random_chance(self):
-        random_num = 1
+        random_num = random.randrange(20)
         if random_num == 1:
             return True
+            
+    def teleporter_collision_check(self, teleporter, objects):
+        return pygame.sprite.groupcollide(teleporter, objects, True, False)
+        
+    def grid(self, dx, dy):
+        """ Used to check to see if teleporter is spawned in front of cerain areas """
+        grid = []
+        for y in range(200):
+            for x in range(200):
+                grid.append([dx+x, dy+y])
+        return grid
+        
+                
             
 class Enemies(pygame.sprite.Sprite):
 <<<<<<< HEAD
@@ -58,6 +71,7 @@ class Room():
         self.teleporter = Teleporter(WHITE)
         if self.teleporter.teleporter_random_chance():
             self.teleporter_list.add(self.teleporter)
+        
     def room_borders(self):
         
                        # Left-top
@@ -94,7 +108,13 @@ class Room_0(Room):
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(wall)
-            
+        
+        if self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(0, 350):
+            self.teleporter.kill()
+        elif self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(1750, 350):
+            self.teleporter.kill()
+        self.teleporter.teleporter_collision_check(self.teleporter_list, self.wall_list)
+        
 class Room_1(Room):
     def __init__(self):
         
@@ -133,7 +153,12 @@ class Room_1(Room):
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(wall)
-                 
+        if self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(0, 350):
+            self.teleporter.kill()
+        elif self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(1750, 350):
+            self.teleporter.kill()
+        self.teleporter.teleporter_collision_check(self.teleporter_list, self.wall_list)
+        
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
