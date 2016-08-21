@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import sys
  
 dX = 1920
 dY = 1080
@@ -16,12 +17,14 @@ ORANGE = (200, 0, 20)
 
 class DrawText():
     def __init__(self, msg, txt_color, bg_color):
+        self.message = str(msg)
 
         self.font = pygame.font.SysFont(None, 48)
-        self.image = self.font.render(str(msg), True, txt_color, bg_color)
+        self.image = self.font.render(self.message, True, txt_color, bg_color)
         self.rect = self.image.get_rect()
         self.rect.center = (dX/2, 50)
-        
+    def update(self, n_msg):
+        self.message = str(n_msg)
     def blit(self, screen):
         screen.blit(self.image, self.rect)
 
@@ -175,6 +178,7 @@ class Enemies(pygame.sprite.Sprite):
         self.rect.y = y
         self.health = 100
         self.room = None
+        self.damage = 10
 
 class Room():
     def __init__(self):
@@ -274,8 +278,27 @@ class Player(pygame.sprite.Sprite):
         self.health = 100
         self.room = None
         
+    def enemy_collision_x(self, direction):
+        enemy_hit_list = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
+        for enemy in enemy_hit_list:
+            if direction > 0:
+                self.rect.right = enemy.rect.left
+            else:
+                self.rect.left = enemy.rect.right
+            self.health -= enemy.damage        
+    def enemy_collision_y(self, direction):
+        enemy_hit_list = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
+        for enemy in enemy_hit_list:
+            if direction > 0:
+                self.rect.bottom = enemy.rect.top
+            else:
+                self.rect.top = enemy.rect.bottom
+            self.health -= enemy.damage
+        
+        
     def update(self):
         self.rect.x += self.moveX
+        self.enemy_collision_x(self.moveX)
         teleporter_hit = pygame.sprite.spritecollide(self, self.room.teleporter_list, False)
         for item in teleporter_hit:
             self.rect.x = random.randrange(100, 1800)
@@ -286,8 +309,11 @@ class Player(pygame.sprite.Sprite):
                 self.rect.right = wall.rect.left
             else:
                 self.rect.left = wall.rect.right
-          
+            self.health -= enemy.damage
+        
+        
         self.rect.y += self.moveY
+        self.enemy_collision_y(self.moveY)
         teleporter_hit = pygame.sprite.spritecollide(self, self.room.teleporter_list, False)
         for item in teleporter_hit:
             self.rect.x = random.randrange(100, 1800)
@@ -298,7 +324,8 @@ class Player(pygame.sprite.Sprite):
                 self.rect.bottom = wall.rect.top
             else:
                 self.rect.top = wall.rect.bottom
-              
+
+     
     def move_left(self):
         self.moveX = -6
         
@@ -362,7 +389,7 @@ def main():
     current_room_no = 0
     current_room = room_list[current_room_no]
     
-    player_health = DrawText(player.health, WHITE, BLACK)
+    draw_player_health = DrawText(player.health, WHITE, BLACK)
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
@@ -370,7 +397,9 @@ def main():
     is_shooting = False
     shot_timer = 0
     cooldown = 600
+    
     while True:
+        print(player.health)
         clock.tick(FPS)
         shot_timer += clock.get_time()
         for event in pygame.event.get():
@@ -425,10 +454,11 @@ def main():
                 player.rect.x = dX
                 player.room = current_room
                 
-        all_sprite_list.update()  
-
+        all_sprite_list.update()
+        draw_player_health.update(player.health)        
+        
         gameDisplay.fill(BLACK)
-        player_health.blit(gameDisplay)
+        draw_player_health.blit(gameDisplay)
         current_room.enemy_list.draw(gameDisplay)
         current_room.wall_list.draw(gameDisplay)
         current_room.teleporter_list.draw(gameDisplay)
