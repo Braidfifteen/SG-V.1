@@ -389,7 +389,7 @@ def main():
     current_room_no = 0
     current_room = room_list[current_room_no]
     
-    draw_player_health = DrawText(player.health, WHITE, BLACK)
+    
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
@@ -399,7 +399,7 @@ def main():
     cooldown = 600
     
     while True:
-        print(player.health)
+
         clock.tick(FPS)
         shot_timer += clock.get_time()
         for event in pygame.event.get():
@@ -455,7 +455,8 @@ def main():
                 player.room = current_room
                 
         all_sprite_list.update()
-        draw_player_health.update(player.health)        
+        draw_player_health = DrawText(player.health, WHITE, BLACK)
+        print(player.health)
         
         gameDisplay.fill(BLACK)
         draw_player_health.blit(gameDisplay)
