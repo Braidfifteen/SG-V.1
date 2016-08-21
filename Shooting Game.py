@@ -277,6 +277,8 @@ class Player(pygame.sprite.Sprite):
         self.moveY = 0
         self.health = 100
         self.room = None
+        self.health_timer = 0
+        self.health_cooldown = 400
         
     def enemy_collision_x(self, direction):
         enemy_hit_list = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
@@ -285,7 +287,10 @@ class Player(pygame.sprite.Sprite):
                 self.rect.right = enemy.rect.left
             else:
                 self.rect.left = enemy.rect.right
-            self.health -= enemy.damage        
+            if self.health_timer > self.health_cooldown:
+                self.health -= enemy.damage
+                self.health_timer = 0
+                
     def enemy_collision_y(self, direction):
         enemy_hit_list = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
         for enemy in enemy_hit_list:
@@ -293,7 +298,9 @@ class Player(pygame.sprite.Sprite):
                 self.rect.bottom = enemy.rect.top
             else:
                 self.rect.top = enemy.rect.bottom
-            self.health -= enemy.damage
+            if self.health_timer > self.health_cooldown:
+                self.health -= enemy.damage
+                self.health_timer = 0
         
         
     def update(self):
@@ -401,6 +408,7 @@ def main():
     while True:
 
         clock.tick(FPS)
+        player.health_timer += clock.get_time()
         shot_timer += clock.get_time()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
