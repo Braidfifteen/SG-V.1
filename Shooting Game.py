@@ -309,7 +309,7 @@ class Player(pygame.sprite.Sprite):
                 self.rect.right = wall.rect.left
             else:
                 self.rect.left = wall.rect.right
-            self.health -= enemy.damage
+
         
         
         self.rect.y += self.moveY
@@ -446,7 +446,6 @@ def main():
                 current_room = room_list[current_room_no]
                 player.rect.x = 0
                 player.room = current_room
-                
         if player.rect.x <= -15:
             if current_room_no == 1:
                 current_room_no = 0
@@ -456,7 +455,6 @@ def main():
                 
         all_sprite_list.update()
         draw_player_health = DrawText(player.health, WHITE, BLACK)
-        print(player.health)
         
         gameDisplay.fill(BLACK)
         draw_player_health.blit(gameDisplay)
