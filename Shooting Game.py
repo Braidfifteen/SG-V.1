@@ -14,6 +14,19 @@ RED = (255, 0, 0)
 PURPLE = (100, 0, 100)
 ORANGE = (200, 0, 20)
 
+class DrawText():
+    def __init__(self, msg, txt_color, bg_color):
+
+        self.font = pygame.font.SysFont(None, 48)
+        self.image = self.font.render(str(msg), True, txt_color, bg_color)
+        self.rect = self.image.get_rect()
+        self.rect.center = (dX/2, 50)
+        
+    def blit(self, screen):
+        screen.blit(self.image, self.rect)
+        
+    
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
         super().__init__()
@@ -190,15 +203,16 @@ class Room_0(Room):
                  [1500, 150, 50, 250, RED],
                  [1200, 800, 500, 50, RED]
                 ]
-        
-        for item in self.borders.left_right_door(WHITE):
+        # Borders
+        for item in self.borders.left_right_door(BLUE):
             border = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(border)
-         
+        # Walls
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(wall)
-        
+            
+        # Teleporter
         if self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(0, 350):
             self.teleporter.kill()
         elif self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(1750, 350):
@@ -259,6 +273,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = dY / 2
         self.moveX = 0
         self.moveY = 0
+        self.health = 100
         self.room = None
         
     def update(self):
@@ -349,7 +364,7 @@ def main():
     current_room_no = 0
     current_room = room_list[current_room_no]
     
-    
+    player_health = DrawText(player.health, WHITE, BLACK)
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
@@ -415,6 +430,7 @@ def main():
         all_sprite_list.update()  
 
         gameDisplay.fill(BLACK)
+        player_health.blit(gameDisplay)
         current_room.enemy_list.draw(gameDisplay)
         current_room.wall_list.draw(gameDisplay)
         current_room.teleporter_list.draw(gameDisplay)
