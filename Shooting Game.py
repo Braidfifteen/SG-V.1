@@ -155,15 +155,15 @@ class Teleporter(pygame.sprite.Sprite):
         return grid
           
 class Enemies(pygame.sprite.Sprite):
-    
-    def __init__(self, x, y, color):
-
+    def __init__(self, x, y):
         super().__init__()
         self.image = pygame.Surface([20, 20])
         self.image.fill(BLUE)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.health = 100
+        self.room = None
 
 class Room():
     def __init__(self):
@@ -178,6 +178,9 @@ class Room():
 class Room_0(Room):
     def __init__(self):
         super().__init__()
+        
+        enemy = Enemies(1000, 500)
+        self.enemy_list.add(enemy)
                 
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
@@ -335,7 +338,8 @@ def main():
     pygame.init()
     gameDisplay = pygame.display.set_mode((dX, dY))
     clock = pygame.time.Clock()
-     
+    
+    player = Player()   
     room_list = []
     room = Room_0()
     room_list.append(room)
@@ -345,7 +349,7 @@ def main():
     current_room_no = 0
     current_room = room_list[current_room_no]
     
-    player = Player()   
+    
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
@@ -411,6 +415,7 @@ def main():
         all_sprite_list.update()  
 
         gameDisplay.fill(BLACK)
+        current_room.enemy_list.draw(gameDisplay)
         current_room.wall_list.draw(gameDisplay)
         current_room.teleporter_list.draw(gameDisplay)
         all_sprite_list.draw(gameDisplay)
