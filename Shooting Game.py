@@ -14,6 +14,19 @@ RED = (255, 0, 0)
 PURPLE = (100, 0, 100)
 ORANGE = (200, 0, 20)
 
+class DrawText():
+    def __init__(self, msg, txt_color, bg_color):
+
+        self.font = pygame.font.SysFont(None, 48)
+        self.image = self.font.render(str(msg), True, txt_color, bg_color)
+        self.rect = self.image.get_rect()
+        self.rect.center = (dX/2, 50)
+        
+    def blit(self, screen):
+        screen.blit(self.image, self.rect)
+        
+    
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
         super().__init__()
@@ -41,6 +54,7 @@ class RoomBorders():
                        [1890, 550, 30, dY, color],
                        # Top
                        [0, 0, dX, 30, color]
+<<<<<<< HEAD
                       ]
         return border_list
         
@@ -114,6 +128,81 @@ class RoomBorders():
         
     def right_up_door(self, color):
         
+=======
+                      ]
+        return border_list
+        
+    def up_down_door(self, color):
+        
+                        # Top-left
+        border_list = [[0, 0, 900, 30, color],
+                        # Top-right
+                       [1000, 0, 920, 30, color],
+                        # Bottom-left
+                       [0, 1050, 900, 30, color],
+                        # Bottom-right
+                       [1000, 1050, 920, 30, color],
+                        # Left
+                       [0, 0, 30, dY, color],
+                        # Right
+                       [1890, 0, 30, dY, color]
+                      ]
+        return border_list
+        
+    def left_up_door(self, color):
+        
+                        # Top-left
+        border_list = [[0, 0, 900, 30, color],
+                        # Top-right
+                       [1000, 0, 920, 30, color],
+                        # Bottom
+                       [0, 1050, dX, 30, color],
+                        # Right
+                       [1890, 0, 30, dY, color],
+                        # Left-top
+                       [0, 0, 30, 450, color],
+                        # Left-bottom
+                       [0, 550, 30, dY, color]
+                      ]
+        return border_list
+        
+    def left_down_door(self, color):
+        
+                        # Top
+        border_list = [[0, 0, dX, 30, color],
+                        # Right
+                       [1890, 0, 30, dY, color],
+                        # Bottom-right
+                       [1000, 1050, 920, 30, color],
+                        # Bottom-left
+                       [0, 1050, 900, 30, color],
+                        # Left-bottom
+                       [0, 550, 30, dY, color],
+                        # Left-top
+                       [0, 0, 30, 450, color]
+                      ]
+        return border_list       
+
+    def right_down_door(self, color):
+        
+                        # Top        
+        border_list = [[0, 0, dX, 30, color],
+                        # Right-top
+                       [1890, 0, 30, 450, color],
+                        # Right-bottom
+                       [1890, 550, 30, dY, color],
+                        # Bottom-right
+                       [1000, 1050, 920, 30, color],
+                        # Bottom-left
+                       [0, 1050, 900, 30, color],
+                        # Left
+                       [0, 0, 30, dY, color]
+                      ]
+        return border_list
+        
+    def right_up_door(self, color):
+        
+>>>>>>> master
                         # Top-left       
         border_list = [[0, 0, 900, 30, color],
                         # Top-right
@@ -155,13 +244,21 @@ class Teleporter(pygame.sprite.Sprite):
         return grid
           
 class Enemies(pygame.sprite.Sprite):
+<<<<<<< HEAD
+    def __init__(self, x, y):
+=======
+    
     def __init__(self, x, y, color):
+
+>>>>>>> master
         super().__init__()
         self.image = pygame.Surface([20, 20])
         self.image.fill(BLUE)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.health = 100
+        self.room = None
 
 class Room():
     def __init__(self):
@@ -176,6 +273,12 @@ class Room():
 class Room_0(Room):
     def __init__(self):
         super().__init__()
+<<<<<<< HEAD
+        
+        enemy = Enemies(1000, 500)
+        self.enemy_list.add(enemy)
+=======
+>>>>>>> master
                 
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
@@ -185,15 +288,20 @@ class Room_0(Room):
                  [1500, 150, 50, 250, RED],
                  [1200, 800, 500, 50, RED]
                 ]
-        
-        for item in self.borders.left_right_door(WHITE):
+        # Borders
+        for item in self.borders.left_right_door(BLUE):
             border = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(border)
+<<<<<<< HEAD
+        # Walls
+=======
          
+>>>>>>> master
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(wall)
-        
+            
+        # Teleporter
         if self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(0, 350):
             self.teleporter.kill()
         elif self.teleporter.rect.x and self.teleporter.rect.y in self.teleporter.grid(1750, 350):
@@ -254,6 +362,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = dY / 2
         self.moveX = 0
         self.moveY = 0
+        self.health = 100
         self.room = None
         
     def update(self):
@@ -333,7 +442,8 @@ def main():
     pygame.init()
     gameDisplay = pygame.display.set_mode((dX, dY))
     clock = pygame.time.Clock()
-     
+    
+    player = Player()   
     room_list = []
     room = Room_0()
     room_list.append(room)
@@ -343,7 +453,7 @@ def main():
     current_room_no = 0
     current_room = room_list[current_room_no]
     
-    player = Player()   
+    player_health = DrawText(player.health, WHITE, BLACK)
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
@@ -409,6 +519,8 @@ def main():
         all_sprite_list.update()  
 
         gameDisplay.fill(BLACK)
+        player_health.blit(gameDisplay)
+        current_room.enemy_list.draw(gameDisplay)
         current_room.wall_list.draw(gameDisplay)
         current_room.teleporter_list.draw(gameDisplay)
         all_sprite_list.draw(gameDisplay)
