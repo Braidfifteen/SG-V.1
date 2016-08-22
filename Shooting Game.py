@@ -14,6 +14,8 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 PURPLE = (100, 0, 100)
 ORANGE = (200, 0, 20)
+YELLOW = (177, 255, 10)
+
 
 class DrawText():
     def __init__(self, msg, txt_color, bg_color, x, y):
@@ -26,6 +28,7 @@ class DrawText():
     def blit(self, screen):
         screen.blit(self.image, self.rect)
 
+        
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
         super().__init__()
@@ -34,7 +37,8 @@ class Wall(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        
+      
+      
 class RoomDoors():
         def __init__(self):
             pass
@@ -55,8 +59,7 @@ class RoomDoors():
             door = [[900, 1050, 100, 10, color]]
             return door
             
-        
-        
+              
 class RoomBorders():
     def __init__(self):
         pass
@@ -163,6 +166,7 @@ class RoomBorders():
                       ]
         return border_list
         
+        
 class Teleporter(pygame.sprite.Sprite):
     def __init__(self, color):
         super().__init__()
@@ -171,6 +175,7 @@ class Teleporter(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(50, 1900)
         self.rect.y = random.randrange(50, 1000)
+        
 
     def teleporter_random_chance(self):
         random_num = random.randrange(20)
@@ -207,7 +212,7 @@ class Enemies(pygame.sprite.Sprite):
 
 class Room():
     def __init__(self):
-
+        self.power_up_list = pygame.sprite.Group()
         self.bullet_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
         self.wall_list = pygame.sprite.Group()
@@ -220,13 +225,17 @@ class Room():
             self.teleporter_list.add(self.teleporter)
             self.teleporter_xy = [self.teleporter.rect.x, self.teleporter.rect.y]
 
+            
 class Room_0(Room):
     def __init__(self):
         super().__init__()
         
         self.enemy = Enemies(1000, 500)
         self.enemy_list.add(self.enemy)
-
+        
+        self.power_up = DamageUp(1500, 500)
+        self.power_up_list.add(self.power_up)
+        
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
                  [650, 350, 50, 350, RED],
@@ -267,6 +276,7 @@ class Room_0(Room):
         if len(self.enemy_list) <= 0:
             self.door1.kill()
             self.door2.kill()
+            
             
 class Room_1(Room):
     def __init__(self):
@@ -336,7 +346,23 @@ class Room_1(Room):
         if len(self.enemy_list) <= 0:
             self.door1.kill()
             self.door2.kill()
+            
+            
+class PowerUp(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((20, 20))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
         
+class DamageUp(PowerUp):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.damage_up = 5
+        
+            
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -351,6 +377,7 @@ class Player(pygame.sprite.Sprite):
         self.room = None
         self.health_timer = 0
         self.health_cooldown = 400
+        self.damage = 10
         
     def enemy_collision_x(self, direction):
         enemy_hit_list = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
@@ -373,8 +400,12 @@ class Player(pygame.sprite.Sprite):
             if self.health_timer > self.health_cooldown:
                 self.health -= enemy.damage
                 self.health_timer = 0
-        
-        
+                
+    def power_up_collision(self):
+        collision_list = pygame.sprite.spritecollide(self, self.room.power_up_list, True)
+        for i in collision_list:
+            self.damage += self.room.power_up.damage_up
+                
     def update(self):
         self.rect.x += self.moveX
         self.enemy_collision_x(self.moveX)
@@ -389,8 +420,6 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.rect.left = wall.rect.right
 
-        
-        
         self.rect.y += self.moveY
         self.enemy_collision_y(self.moveY)
         teleporter_hit = pygame.sprite.spritecollide(self, self.room.teleporter_list, False)
@@ -403,8 +432,9 @@ class Player(pygame.sprite.Sprite):
                 self.rect.bottom = wall.rect.top
             else:
                 self.rect.top = wall.rect.bottom
-
-     
+                
+        self.power_up_collision()
+        
     def move_left(self):
         self.moveX = -6
         
@@ -423,6 +453,7 @@ class Player(pygame.sprite.Sprite):
     def stopY(self):
         self.moveY = 0
         
+        
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, start_x, start_y, dest_x, dest_y):
         super().__init__()
@@ -440,6 +471,7 @@ class Bullet(pygame.sprite.Sprite):
         self.moveX = math.cos(angle) * velocity
         self.moveY = math.sin(angle) * velocity
         self.room = None
+        self.player = None
         self.damage = 10
         
     def update(self):
@@ -455,7 +487,7 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
         enemy_collision = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
         for bullet in enemy_collision:
-            self.room.enemy.health -= self.damage
+            self.room.enemy.health -= self.player.damage
             self.kill()
             
    
@@ -477,7 +509,6 @@ def main():
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
-    
     
     is_shooting = False
     shot_timer = 0
@@ -522,8 +553,8 @@ def main():
             mouse_y = pos[1]
             bullet = Bullet(player.rect.x + 10, player.rect.y + 10, mouse_x, mouse_y)
             bullet.room = player.room
+            bullet.player = player
             bullet.room.bullet_list.add(bullet)
-            #all_sprite_list.add(bullet)
             shot_timer = 0
             
         # Room change   
@@ -545,10 +576,9 @@ def main():
         
         draw_player_health = DrawText(player.health, WHITE, BLACK, dX/2, 50)
         draw_enemy_health = DrawText(player.room.enemy.health, WHITE, BLACK, 410, 50)
-        
-        
-        
+       
         gameDisplay.fill(BLACK)
+        current_room.power_up_list.draw(gameDisplay)
         current_room.bullet_list.draw(gameDisplay)
         current_room.enemy_list.draw(gameDisplay)
         current_room.wall_list.draw(gameDisplay)
@@ -557,7 +587,6 @@ def main():
         draw_enemy_health.blit(gameDisplay)
         all_sprite_list.draw(gameDisplay)
         pygame.display.update()
-        
         
     pygame.quit()
     sys.exit
