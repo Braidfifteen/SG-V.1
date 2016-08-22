@@ -15,6 +15,7 @@ RED = (255, 0, 0)
 PURPLE = (100, 0, 100)
 ORANGE = (200, 0, 20)
 YELLOW = (177, 255, 10)
+PURPLE2 = (84, 10, 145)
 
 
 class DrawText():
@@ -211,7 +212,8 @@ class Enemies(pygame.sprite.Sprite):
     
 
 class Room():
-    def __init__(self):
+    def __init__(self, player):
+        self.player = player
         self.power_up_list = pygame.sprite.Group()
         self.bullet_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
@@ -224,17 +226,26 @@ class Room():
         if self.teleporter.teleporter_random_chance():
             self.teleporter_list.add(self.teleporter)
             self.teleporter_xy = [self.teleporter.rect.x, self.teleporter.rect.y]
-
+            
+        self.power_ups = []
+        self.powerup = DamageUp(self.player)
+        self.power_ups.append(self.powerup)
+        self.powerup = SpeedUp(self.player)
+        self.power_ups.append(self.powerup)
+        
+        if self.powerup.rand_chance():  
+            rand_int = random.randrange(len(self.power_ups))
+            self.power_up_list.add(self.power_ups[rand_int])
+        
+        
             
 class Room_0(Room):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, player):
+        super().__init__(player)
         
         self.enemy = Enemies(1000, 500)
         self.enemy_list.add(self.enemy)
         
-        self.power_up = DamageUp(1500, 500)
-        self.power_up_list.add(self.power_up)
         
         walls = [[300, 200, 50, 350, RED],
                  [250, 600, 450, 50, RED],
@@ -257,6 +268,7 @@ class Room_0(Room):
         for item in self.borders.left_right_door(BLUE):
             border = Wall(item[0], item[1], item[2], item[3], item[4])
             self.wall_list.add(border)
+            
         # Walls
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3], item[4])
@@ -268,7 +280,10 @@ class Room_0(Room):
         elif self.teleporter_xy in self.teleporter.grid(1750, 350):
             self.teleporter.kill()
         self.teleporter.teleporter_collision_check(self.teleporter_list, self.wall_list)
-    
+        
+        # Powerup
+        self.powerup.collision_check(self.power_up_list, self.wall_list)
+        
     def update(self):
         self.enemy.update()
         for i in self.bullet_list:
@@ -279,9 +294,9 @@ class Room_0(Room):
             
             
 class Room_1(Room):
-    def __init__(self):
+    def __init__(self, player):
         
-        super().__init__()
+        super().__init__(player)
         
         self.enemy = Enemies(1000, 500)
         self.enemy_list.add(self.enemy)
@@ -337,6 +352,9 @@ class Room_1(Room):
             self.teleporter.kill()
         self.teleporter.teleporter_collision_check(self.teleporter_list, self.wall_list)
         
+        # Powerup
+        self.powerup.collision_check(self.power_up_list, self.wall_list)
+        
     def update(self):
         self.enemy.update()
         
@@ -349,20 +367,43 @@ class Room_1(Room):
             
             
 class PowerUp(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, player):
         super().__init__()
         self.image = pygame.Surface((20, 20))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = random.randrange(50, 1900)
+        self.rect.y = random.randrange(50, 1000)
+        self.player = player
+        
+    def rand_chance(self):
+        rand_int = random.randrange(50)
+        if rand_int == 1:
+            return True
+        
+    def collision_check(self, powerup, objects):
+        return pygame.sprite.groupcollide(powerup, objects, True, False)
+        
         
 class DamageUp(PowerUp):
-    def __init__(self, x, y):
-        super().__init__(x, y)
-        self.damage_up = 5
+    def __init__(self, player):
+        super().__init__(player)
+        self.dmg = 5
         
-            
+    def pickup(self):
+        self.player.damage += self.dmg
+        
+        
+class SpeedUp(PowerUp):
+    def __init__(self, player):
+        super().__init__(player)
+        self.speed = 4
+        self.image.fill(PURPLE2)
+        
+    def pickup(self):
+        self.player.speed += self.speed
+        
+        
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -378,6 +419,7 @@ class Player(pygame.sprite.Sprite):
         self.health_timer = 0
         self.health_cooldown = 400
         self.damage = 10
+        self.speed = 6
         
     def enemy_collision_x(self, direction):
         enemy_hit_list = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
@@ -404,7 +446,7 @@ class Player(pygame.sprite.Sprite):
     def power_up_collision(self):
         collision_list = pygame.sprite.spritecollide(self, self.room.power_up_list, True)
         for i in collision_list:
-            self.damage += self.room.power_up.damage_up
+            i.pickup()
                 
     def update(self):
         self.rect.x += self.moveX
@@ -436,16 +478,16 @@ class Player(pygame.sprite.Sprite):
         self.power_up_collision()
         
     def move_left(self):
-        self.moveX = -6
+        self.moveX = -self.speed
         
     def move_right(self):
-        self.moveX = 6
+        self.moveX = self.speed
         
     def move_up(self):
-        self.moveY = -6
+        self.moveY = -self.speed
         
     def move_down(self):
-        self.moveY = 6
+        self.moveY = self.speed
         
     def stopX(self):
         self.moveX = 0
@@ -498,9 +540,9 @@ def main():
     
     player = Player()   
     room_list = []
-    room = Room_0()
+    room = Room_0(player)
     room_list.append(room)
-    room = Room_1()
+    room = Room_1(player)
     room_list.append(room)
    
     current_room_no = 0
