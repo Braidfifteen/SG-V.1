@@ -26,6 +26,7 @@ class DrawText():
         self.image = self.font.render(self.message, True, txt_color, bg_color)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        
     def blit(self, screen):
         screen.blit(self.image, self.rect)
 
@@ -205,7 +206,7 @@ class Enemies(pygame.sprite.Sprite):
         self.health = 100
         self.room = None
         self.damage = 10
-    
+        
     def update(self):
         if self.health <= 0:
             self.kill()
@@ -327,6 +328,7 @@ class Room_1(Room):
                  [1300, 850, 200, 50, PURPLE],
                  [1500, 900, 150, 50, PURPLE]
                 ]
+                
         # Doors
         for i in self.doors.left_door(RED):
             self.door1 = Wall(i[0], i[1], i[2], i[3], i[4])
@@ -420,6 +422,9 @@ class Player(pygame.sprite.Sprite):
         self.health_cooldown = 400
         self.damage = 10
         self.speed = 6
+        self.shot_timer = 0
+        self.shot_cooldown = 600
+        self.is_shooting = False
         
     def enemy_collision_x(self, direction):
         enemy_hit_list = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
@@ -509,12 +514,16 @@ class Bullet(pygame.sprite.Sprite):
         x_diff = dest_x - start_x
         y_diff = dest_y - start_y
         angle = math.atan2(y_diff, x_diff);
-        velocity = 10
-        self.moveX = math.cos(angle) * velocity
-        self.moveY = math.sin(angle) * velocity
+        self.velocity = 10
+        self.moveX = math.cos(angle) * self.velocity
+        self.moveY = math.sin(angle) * self.velocity
         self.room = None
         self.player = None
         self.damage = 10
+        self.shot_timer = 0
+        self.cooldown = 600
+        self.is_shooting = False
+
         
     def update(self):
         self.floating_point_x += self.moveX
@@ -530,6 +539,7 @@ class Bullet(pygame.sprite.Sprite):
         enemy_collision = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
         for bullet in enemy_collision:
             self.room.enemy.health -= self.player.damage
+            
             self.kill()
             
    
@@ -551,16 +561,12 @@ def main():
     all_sprite_list = pygame.sprite.Group()
     all_sprite_list.add(player)
     player.room = current_room
-    
-    is_shooting = False
-    shot_timer = 0
-    cooldown = 600
-    
+
     while True:
 
         clock.tick(FPS)
         player.health_timer += clock.get_time()
-        shot_timer += clock.get_time()
+        player.shot_timer += clock.get_time()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -585,11 +591,11 @@ def main():
                     player.stopY()
                     
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                is_shooting = True
+                player.is_shooting = True
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                is_shooting = False
+                player.is_shooting = False
     
-        if is_shooting and shot_timer >= cooldown:
+        if player.is_shooting and player.shot_timer >= player.shot_cooldown:
             pos = pygame.mouse.get_pos()
             mouse_x = pos[0]
             mouse_y = pos[1]
@@ -597,7 +603,7 @@ def main():
             bullet.room = player.room
             bullet.player = player
             bullet.room.bullet_list.add(bullet)
-            shot_timer = 0
+            player.shot_timer = 0
             
         # Room change   
         if player.rect.x >= dX:
@@ -612,12 +618,14 @@ def main():
                 current_room = room_list[current_room_no]
                 player.rect.x = dX
                 player.room = current_room
-                
+        
+
+        
         all_sprite_list.update()
         player.room.update()
         
-        draw_player_health = DrawText(player.health, WHITE, BLACK, dX/2, 50)
-        draw_enemy_health = DrawText(player.room.enemy.health, WHITE, BLACK, 410, 50)
+        
+        
        
         gameDisplay.fill(BLACK)
         current_room.power_up_list.draw(gameDisplay)
@@ -625,8 +633,6 @@ def main():
         current_room.enemy_list.draw(gameDisplay)
         current_room.wall_list.draw(gameDisplay)
         current_room.teleporter_list.draw(gameDisplay)
-        draw_player_health.blit(gameDisplay)
-        draw_enemy_health.blit(gameDisplay)
         all_sprite_list.draw(gameDisplay)
         pygame.display.update()
         
