@@ -16,6 +16,7 @@ PURPLE = (100, 0, 100)
 ORANGE = (200, 0, 20)
 YELLOW = (177, 255, 10)
 PURPLE2 = (84, 10, 145)
+MIDNIGHTBLUE = (25, 25, 112)
 
 
 class DrawText():
@@ -196,13 +197,13 @@ class Teleporter(pygame.sprite.Sprite):
         return grid
           
 class Enemies(pygame.sprite.Sprite):
-    def __init__(self, x, y, player):
+    def __init__(self, player):
         super().__init__()
         self.image = pygame.Surface([20, 20])
         self.image.fill(BLUE)
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = random.randint(1, 1900)
+        self.rect.y = random.randint(1, 1000)
         self.health = 100
         self.room = None
         self.damage = 10
@@ -213,24 +214,26 @@ class Enemies(pygame.sprite.Sprite):
         vx = self.player.rect.x - self.rect.x
         vy = self.player.rect.y - self.rect.y
         dist = math.sqrt(vx**2 + vy**2)
-        
-      
-            
         vx = vx / dist
         vy = vy / dist    
-            
-
-            
         return [vx, vy]
         
     def update(self):
         self.rect.x += int(self.move_towards_player()[0] * self.speed)
         self.rect.y += int(self.move_towards_player()[1] * self.speed)
-        
-
         if self.health <= 0:
             self.kill()
     
+class En1(Enemies):
+    def __init__(self, player):
+        super().__init__(player)
+        self.image.fill(PURPLE2)
+        
+class En2(Enemies):
+    def __init__(self, player):
+        super().__init__(player)
+        self.image.fill(MIDNIGHTBLUE)
+        
 
 class Room():
     def __init__(self, player):
@@ -264,8 +267,12 @@ class Room_0(Room):
     def __init__(self, player):
         super().__init__(player)
         
-        self.enemy = Enemies(1000, 500, self.player)
-        self.enemy_list.add(self.enemy)
+        self.enemy = RandomEnemies(self.player).enemies_in_room
+        for i in self.enemy:
+            en = i
+            self.enemy_list.add(en)
+        
+        
         
         
         walls = [[300, 200, 50, 350, RED],
@@ -306,7 +313,8 @@ class Room_0(Room):
         self.powerup.collision_check(self.power_up_list, self.wall_list)
         
     def update(self):
-        self.enemy.update()
+        for i in self.enemy:
+            i.update()
         for i in self.bullet_list:
             i.update()
         if len(self.enemy_list) <= 0:
@@ -319,7 +327,7 @@ class Room_1(Room):
         
         super().__init__(player)
         
-        self.enemy = Enemies(1000, 500, self.player)
+        self.enemy = Enemies(self.player)
         self.enemy_list.add(self.enemy)
 
         walls = [[400, 300, 50, 200, PURPLE],
@@ -387,7 +395,23 @@ class Room_1(Room):
             self.door1.kill()
             self.door2.kill()
             
+class RandomEnemies():
+        def __init__(self, player):
+            self.enemy_list = [En1(player), En2(player), En1(player)]
+            self.enemies_in_room = self.pick_enemies()
             
+            for i in self.enemies_in_room:
+                self.health = i.health
+                
+                
+        def pick_enemies(self):
+            rnd = random.randint(1, len(self.enemy_list))
+            return random.sample(self.enemy_list, rnd)
+            
+        def update(self):
+            for i in self.enemies_in_room:
+                i.update()
+        
 class PowerUp(pygame.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
@@ -443,7 +467,7 @@ class Player(pygame.sprite.Sprite):
         self.damage = 10
         self.speed = 6
         self.shot_timer = 0
-        self.shot_cooldown = 600
+        self.shot_cooldown = 100
         self.is_shooting = False
         
     def enemy_collision_x(self, direction):
@@ -553,10 +577,11 @@ class Bullet(pygame.sprite.Sprite):
         for bullet in bullet_wall_collision:
             self.kill()
         enemy_collision = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
-        for bullet in enemy_collision:
-            self.room.enemy.health -= self.player.damage
+        for j in self.room.enemy:
+            for i in enemy_collision:
+                self.room.enemy[j].health -= self.player.damage
             
-            self.kill()
+                self.kill()
             
    
 def main():
