@@ -196,7 +196,7 @@ class Teleporter(pygame.sprite.Sprite):
         return grid
           
 class Enemies(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, player):
         super().__init__()
         self.image = pygame.Surface([20, 20])
         self.image.fill(BLUE)
@@ -207,21 +207,27 @@ class Enemies(pygame.sprite.Sprite):
         self.room = None
         self.damage = 10
         self.speed = 5
+        self.player = player
         
-    def update(self, player):
-        vx = player.rect.x - self.rect.x
-        vy = player.rect.y - self.rect.y
+    def move_towards_player(self):
+        vx = self.player.rect.x - self.rect.x
+        vy = self.player.rect.y - self.rect.y
         dist = math.sqrt(vx**2 + vy**2)
-        vx = vx // dist
-        vy = vy // dist
-        if dist == 0:
-            dist = 1
-        else:
-            self.rect.x += int(vx * self.speed)
-            self.rect.y += int(vy * self.speed)
-        print(int(vx*self.speed), int(vy*self.speed))
-
         
+      
+            
+        vx = vx / dist
+        vy = vy / dist    
+            
+
+            
+        return [vx, vy]
+        
+    def update(self):
+        self.rect.x += int(self.move_towards_player()[0] * self.speed)
+        self.rect.y += int(self.move_towards_player()[1] * self.speed)
+        
+
         if self.health <= 0:
             self.kill()
     
@@ -258,7 +264,7 @@ class Room_0(Room):
     def __init__(self, player):
         super().__init__(player)
         
-        self.enemy = Enemies(1000, 500)
+        self.enemy = Enemies(1000, 500, self.player)
         self.enemy_list.add(self.enemy)
         
         
@@ -300,7 +306,7 @@ class Room_0(Room):
         self.powerup.collision_check(self.power_up_list, self.wall_list)
         
     def update(self):
-        self.enemy.update(self.player)
+        self.enemy.update()
         for i in self.bullet_list:
             i.update()
         if len(self.enemy_list) <= 0:
@@ -313,7 +319,7 @@ class Room_1(Room):
         
         super().__init__(player)
         
-        self.enemy = Enemies(1000, 500)
+        self.enemy = Enemies(1000, 500, self.player)
         self.enemy_list.add(self.enemy)
 
         walls = [[400, 300, 50, 200, PURPLE],
@@ -372,7 +378,7 @@ class Room_1(Room):
         self.powerup.collision_check(self.power_up_list, self.wall_list)
         
     def update(self):
-        self.enemy.update(self.player)
+        self.enemy.update()
         
         for i in self.bullet_list:
             i.update()
