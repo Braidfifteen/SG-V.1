@@ -206,8 +206,22 @@ class Enemies(pygame.sprite.Sprite):
         self.health = 100
         self.room = None
         self.damage = 10
+        self.speed = 5
         
-    def update(self):
+    def update(self, player):
+        vx = player.rect.x - self.rect.x
+        vy = player.rect.y - self.rect.y
+        dist = math.sqrt(vx**2 + vy**2)
+        vx = vx // dist
+        vy = vy // dist
+        if dist == 0:
+            dist = 1
+        else:
+            self.rect.x += int(vx * self.speed)
+            self.rect.y += int(vy * self.speed)
+        print(int(vx*self.speed), int(vy*self.speed))
+
+        
         if self.health <= 0:
             self.kill()
     
@@ -286,7 +300,7 @@ class Room_0(Room):
         self.powerup.collision_check(self.power_up_list, self.wall_list)
         
     def update(self):
-        self.enemy.update()
+        self.enemy.update(self.player)
         for i in self.bullet_list:
             i.update()
         if len(self.enemy_list) <= 0:
@@ -358,7 +372,7 @@ class Room_1(Room):
         self.powerup.collision_check(self.power_up_list, self.wall_list)
         
     def update(self):
-        self.enemy.update()
+        self.enemy.update(self.player)
         
         for i in self.bullet_list:
             i.update()
@@ -517,12 +531,8 @@ class Bullet(pygame.sprite.Sprite):
         self.velocity = 10
         self.moveX = math.cos(angle) * self.velocity
         self.moveY = math.sin(angle) * self.velocity
-        self.room = None
         self.player = None
-        self.damage = 10
-        self.shot_timer = 0
-        self.cooldown = 600
-        self.is_shooting = False
+
 
         
     def update(self):
