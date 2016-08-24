@@ -577,8 +577,8 @@ class Bullet(pygame.sprite.Sprite):
         for bullet in bullet_wall_collision:
             self.kill()
         enemy_collision = pygame.sprite.spritecollide(self, self.room.enemy_list, False)
-        for j in self.room.enemy:
-            for i in enemy_collision:
+        for i in enemy_collision:
+            for j in self.room.enemy:
                 self.room.enemy[j].health -= self.player.damage
             
                 self.kill()
